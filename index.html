@@ -1,0 +1,2688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Precificação 3D — 3D Solimões</title>
+  <style>
+    /* ==========================================================================
+       DESIGN TOKENS & VARIÁVEIS DE TEMA (3D SOLIMÕES — STUDIO PRO)
+       100% autocontido (zero dependências externas para carregamento instantâneo)
+       ========================================================================== */
+    :root {
+      --bg-body: #090d16;
+      --bg-surface: #111827;
+      --bg-surface-alt: #0b111e;
+      --bg-elevated: #1f2937;
+      --border-color: #1f2937;
+      --border-strong: #374151;
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --accent-soft: rgba(16, 185, 129, 0.14);
+      --accent-border: rgba(16, 185, 129, 0.42);
+      --sky: #38bdf8;
+      --sky-soft: rgba(56, 189, 248, 0.14);
+      --sky-border: rgba(56, 189, 248, 0.35);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.14);
+      --amber-border: rgba(245, 158, 11, 0.35);
+      --rose: #fb7185;
+      --rose-soft: rgba(251, 113, 133, 0.14);
+      --shadow-card: 0 12px 28px -8px rgba(0, 0, 0, 0.55);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    body.light-mode {
+      --bg-body: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-surface-alt: #f8fafc;
+      --bg-elevated: #e2e8f0;
+      --border-color: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --accent: #059669;
+      --accent-hover: #047857;
+      --accent-soft: rgba(5, 150, 105, 0.1);
+      --accent-border: rgba(5, 150, 105, 0.35);
+      --sky: #0284c7;
+      --sky-soft: rgba(2, 132, 199, 0.1);
+      --sky-border: rgba(2, 132, 199, 0.3);
+      --amber: #d97706;
+      --amber-soft: rgba(217, 119, 6, 0.1);
+      --amber-border: rgba(217, 119, 6, 0.3);
+      --rose: #e11d48;
+      --rose-soft: rgba(225, 29, 72, 0.1);
+      --shadow-card: 0 10px 25px -8px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-primary);
+      line-height: 1.45;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ==========================================================================
+       HEADER & NAVEGAÇÃO
+       ========================================================================== */
+    .app-header {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .header-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #10b981, #0f766e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      flex-shrink: 0;
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .badge-pro {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+      text-transform: uppercase;
+    }
+
+    .brand-sub {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .header-controls {
+        width: auto;
+      }
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 4px;
+      flex: 1;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 9px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
+    .cat-pill {
+      font-size: 0.68rem;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.22);
+      color: inherit;
+    }
+
+    .theme-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface-alt);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .theme-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    /* ==========================================================================
+       BANNER HÍBRIDO PASSIVO (85W — CRYOGRIP + TEXTURIZADA)
+       ========================================================================== */
+    .passive-banner-wrap {
+      max-width: 1240px;
+      margin: 16px auto 0;
+      padding: 0 18px;
+    }
+
+    .passive-banner {
+      background: linear-gradient(90deg, var(--accent-soft), var(--amber-soft));
+      border: 1px solid var(--accent-border);
+      border-radius: 14px;
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    .passive-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .pulse-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+      flex-shrink: 0;
+    }
+
+    .passive-banner-right {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--bg-surface);
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* ==========================================================================
+       CONTAINER PRINCIPAL & GRID
+       ========================================================================== */
+    .main-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 18px 18px 48px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (min-width: 1024px) {
+      .calc-grid {
+        grid-template-columns: 1.25fr 0.95fr;
+        gap: 24px;
+      }
+    }
+
+    .stack-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .sticky-col {
+      position: static;
+    }
+
+    @media (min-width: 1024px) {
+      .sticky-col {
+        position: sticky;
+        top: 84px;
+      }
+    }
+
+    /* ==========================================================================
+       CARDS & FORMULÁRIOS
+       ========================================================================== */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-title {
+      font-size: 0.96rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 600px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      border-radius: var(--radius-md);
+      padding: 11px 14px;
+      font-size: 0.94rem;
+      font-weight: 700;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    .has-prefix {
+      padding-left: 38px !important;
+    }
+
+    .has-suffix {
+      padding-right: 48px !important;
+    }
+
+    .input-prefix,
+    .input-suffix {
+      position: absolute;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .input-prefix { left: 13px; }
+    .input-suffix { right: 13px; }
+
+    .field-hint {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
+    .field-hint.accent {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .time-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Botões de Quantidade */
+    .qty-stepper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qty-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-surface-alt);
+      color: var(--text-primary);
+      font-size: 1.2rem;
+      font-weight: 800;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s ease;
+    }
+
+    .qty-btn:hover {
+      background: var(--bg-elevated);
+    }
+
+    .qty-input {
+      text-align: center;
+      color: var(--accent) !important;
+      font-size: 1.05rem !important;
+    }
+
+    /* Presets de Markup */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    @media (min-width: 600px) {
+      .preset-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .preset-btn {
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 11px 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: var(--text-primary);
+    }
+
+    .preset-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .preset-btn.active {
+      border: 2px solid var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .preset-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .preset-val {
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .preset-val span {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    /* Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--bg-elevated);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+      cursor: pointer;
+    }
+
+    .slider-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       COLUNA DE RESULTADOS (PIX VS CARTÃO + COMPOSIÇÃO)
+       ========================================================================== */
+    .payment-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 540px) {
+      .payment-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .pay-card {
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .pay-card.pix {
+      background: linear-gradient(180deg, var(--accent-soft), var(--bg-surface-alt));
+      border: 2px solid var(--accent-border);
+    }
+
+    .pay-card.card-credit {
+      background: linear-gradient(180deg, var(--sky-soft), var(--bg-surface-alt));
+      border: 1.5px solid var(--sky-border);
+    }
+
+    .pay-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .pay-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pay-card.pix .pay-tag { color: var(--accent); }
+    .pay-card.card-credit .pay-tag { color: var(--sky); }
+
+    .pay-pill {
+      font-size: 0.66rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+    }
+
+    .pay-card.pix .pay-pill {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .pay-card.card-credit .pay-pill {
+      background: var(--sky-soft);
+      color: var(--sky);
+    }
+
+    .pay-price {
+      font-size: 1.55rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      margin-top: 4px;
+      line-height: 1.15;
+    }
+
+    .pay-sub {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .pay-footer {
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.75rem;
+    }
+
+    .mini-input {
+      width: 72px !important;
+      padding: 6px 24px 6px 8px !important;
+      font-size: 0.8rem !important;
+      text-align: right;
+    }
+
+    .mini-select {
+      padding: 7px 10px !important;
+      font-size: 0.78rem !important;
+    }
+
+    /* KPIs */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .kpi-box {
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 11px 12px;
+    }
+
+    .kpi-label {
+      font-size: 0.66rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .kpi-val {
+      font-size: 0.98rem;
+      font-weight: 800;
+      margin-top: 3px;
+    }
+
+    .text-rose { color: var(--rose); }
+    .text-emerald { color: var(--accent); }
+    .text-sky { color: var(--sky); }
+
+    /* Barra Empilhada */
+    .breakdown-box {
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .breakdown-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .stacked-bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--bg-elevated);
+      overflow: hidden;
+      display: flex;
+      gap: 2px;
+      margin-bottom: 12px;
+    }
+
+    .bar-seg {
+      height: 100%;
+      transition: width 0.25s ease;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px 14px;
+      font-size: 0.74rem;
+    }
+
+    @media (min-width: 480px) {
+      .legend-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-secondary);
+    }
+
+    .legend-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .legend-val {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .legend-total {
+      grid-column: 1 / -1;
+      padding-top: 8px;
+      margin-top: 4px;
+      border-top: 1px solid var(--border-color);
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    /* Botões de Ação */
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 480px) {
+      .action-row {
+        grid-template-columns: 1.7fr 1fr;
+      }
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 13px 16px;
+      font-size: 0.86rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s ease, transform 0.1s ease;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.99);
+    }
+
+    .btn-secondary {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+    }
+
+    .btn-ghost {
+      background: var(--bg-surface-alt);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-ghost:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* ==========================================================================
+       UPLOAD DE IMAGENS (ATÉ 2 FOTOS COMPRIMIDAS) & MODAL DE AMPLIAÇÃO
+       ========================================================================== */
+    .photo-section {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .photo-dropzone {
+      border: 1.5px dashed var(--border-strong);
+      background: var(--bg-surface-alt);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .photo-dropzone:hover,
+    .photo-dropzone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .photo-drop-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .photo-drop-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--bg-elevated);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .photo-thumbs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .photo-thumb-card {
+      position: relative;
+      height: 112px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-surface-alt);
+    }
+
+    .photo-thumb-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .photo-remove-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(9, 13, 22, 0.85);
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease;
+    }
+
+    .photo-remove-btn:hover {
+      background: var(--rose);
+    }
+
+    .editing-pill-bar {
+      background: var(--amber-soft);
+      border: 1px solid var(--amber-border);
+      color: var(--amber);
+      border-radius: var(--radius-sm);
+      padding: 7px 11px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    /* Imagens nos cards do Catálogo */
+    .cat-media-strip {
+      display: grid;
+      gap: 6px;
+      height: 132px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-color);
+      margin-bottom: 12px;
+    }
+
+    .cat-media-strip.cols-1 {
+      grid-template-columns: 1fr;
+    }
+
+    .cat-media-strip.cols-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .cat-media-strip img {
+      width: 100%;
+      height: 132px;
+      object-fit: cover;
+      display: block;
+      cursor: zoom-in;
+      transition: transform 0.2s ease;
+    }
+
+    .cat-media-strip img:hover {
+      transform: scale(1.03);
+    }
+
+    .cat-media-empty {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    /* Modal de Ampliação de Foto */
+    .img-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(5, 8, 15, 0.86);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .img-modal-box {
+      position: relative;
+      max-width: 92vw;
+      max-height: 88vh;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .img-modal-box img {
+      max-width: 100%;
+      max-height: 76vh;
+      border-radius: 10px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .img-modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* ==========================================================================
+       CATÁLOGO & CONFIGURAÇÕES
+       ========================================================================== */
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    @media (min-width: 680px) {
+      .catalog-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .catalog-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .cat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: border-color 0.15s ease;
+    }
+
+    .cat-card:hover {
+      border-color: var(--accent-border);
+    }
+
+    .cat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .cat-mat-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .btn-del {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .btn-del:hover {
+      color: var(--rose);
+      background: var(--rose-soft);
+    }
+
+    .cat-name {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .cat-meta {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .cat-bottom {
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    @media (min-width: 960px) {
+      .settings-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .fee-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 60;
+      background: var(--bg-surface);
+      border: 1px solid var(--accent);
+      color: var(--text-primary);
+      padding: 12px 16px;
+      border-radius: 14px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      transform: translateY(120px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      max-width: calc(100vw - 40px);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Modal para Ampliar Foto do Catálogo/Editor -->
+  <div id="imgModal" class="img-modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Visualização da Foto">
+    <div class="img-modal-box">
+      <img id="imgModalTarget" src="" alt="Foto ampliada da peça 3D" />
+      <div class="img-modal-footer">
+        <span id="imgModalCaption">Peça 3D Solimões</span>
+        <button type="button" id="btnCloseImgModal" class="btn-ghost">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificação Toast (substitui alert/confirm) -->
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <span id="toastDot" class="pulse-dot"></span>
+    <span id="toastMsg">Pronto!</span>
+  </div>
+
+  <!-- Cabeçalho -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-box">
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title-row">
+            <h1 class="brand-title">3D Solimões</h1>
+            <span class="badge-pro">Studio Calc</span>
+          </div>
+          <p class="brand-sub">Bambu Lab A1 + AMS Lite • Tabatinga, AM</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <nav class="nav-tabs" aria-label="Seções da Calculadora">
+          <button type="button" class="tab-btn active" data-tab="calc">1. Calculadora</button>
+          <button type="button" class="tab-btn" data-tab="catalog">
+            2. Catálogo <span id="navCatCount" class="cat-pill">3</span>
+          </button>
+          <button type="button" class="tab-btn" data-tab="settings">3. Parâmetros</button>
+        </nav>
+        <button type="button" id="btnToggleTheme" class="theme-btn" title="Alternar Tema Claro/Escuro" aria-label="Alternar Tema">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Faixa Informativa de Calibração Híbrida Passiva -->
+  <div class="passive-banner-wrap">
+    <div class="passive-banner">
+      <div class="passive-banner-left">
+        <span class="pulse-dot"></span>
+        <span>Modo Híbrido Passivo: 85W — Placa Fria CryoGrip + Texturizada</span>
+      </div>
+      <div id="bannerMachRate" class="passive-banner-right">Hora-Máquina Fixa: R$ 1,58/h</div>
+    </div>
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <main class="main-container">
+
+    <!-- ==================== ABA 1: CALCULADORA DE ORÇAMENTO ==================== -->
+    <section id="view-calc" class="tab-view calc-grid">
+
+      <!-- Coluna Esquerda: Entradas -->
+      <div class="stack-col">
+
+        <!-- Card 1: Peça, Material e Peso Unificado -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title"><span class="step-badge">1</span> Peça, Material e Peso Total</h2>
+            <button type="button" id="btnNewPiece" class="btn-ghost">Limpar Campos</button>
+          </div>
+
+          <div id="editingBanner" class="editing-pill-bar hidden">
+            <span id="editingBannerText">Editando item salvo no catálogo</span>
+            <button type="button" id="btnCancelEdit" class="btn-ghost" style="padding:3px 8px;font-size:0.7rem;">Desvincular</button>
+          </div>
+
+          <div class="field-group" style="margin-bottom: 14px;">
+            <label class="field-label" for="inName">Nome da Peça / Projeto (Opcional)</label>
+            <input type="text" id="inName" value="Organizador de Mesa Robusto" placeholder="Ex: Luminária Escultural 28cm" />
+          </div>
+
+          <div class="form-grid-2">
+            <div class="field-group">
+              <label class="field-label" for="inFilType">Tipo de Filamento</label>
+              <select id="inFilType">
+                <option value="pla">PLA Comum (R$ 135,00/kg)</option>
+                <option value="pla_silk">PLA Silk / Especial / Fosco (R$ 165,00/kg)</option>
+                <option value="petg">PETG Alta Resistência (R$ 145,00/kg)</option>
+                <option value="abs">ABS / ASA (R$ 150,00/kg)</option>
+                <option value="tpu">TPU Flexível (R$ 180,00/kg)</option>
+                <option value="custom">Personalizado (Digitar R$/kg)</option>
+              </select>
+
+              <div id="customFilWrap" class="hidden" style="margin-top: 6px;">
+                <div class="input-wrap">
+                  <span class="input-prefix">R$</span>
+                  <input type="number" id="inCustomFilKg" class="has-prefix has-suffix" step="1" min="1" value="165" />
+                  <span class="input-suffix">/kg</span>
+                </div>
+              </div>
+              <span id="outFilUnitHint" class="field-hint accent">R$ 135,00/kg • R$ 0,135/g (aterrado Tabatinga)</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="inTotalWeight">Peso Total no Fatiador (g)</label>
+              <div class="input-wrap">
+                <input type="number" id="inTotalWeight" class="has-suffix" min="1" step="1" value="245" />
+                <span class="input-suffix">g</span>
+              </div>
+              <span class="field-hint">Valor único do Bambu Studio (peça + suportes + brim + torre de purga).</span>
+            </div>
+          </div>
+
+          <!-- Anexo de até 2 Fotos da Peça -->
+          <div class="photo-section">
+            <div class="field-label" style="margin-bottom: 6px;">
+              <span>Fotos da Peça (até 2 imagens)</span>
+              <span id="outPhotoCount" style="color: var(--accent);">0/2 fotos</span>
+            </div>
+
+            <div id="photoDropzone" class="photo-dropzone" role="button" tabindex="0" aria-label="Selecionar ou arrastar até 2 fotos da peça">
+              <div class="photo-drop-info">
+                <div class="photo-drop-icon" aria-hidden="true">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <div style="font-weight: 700; color: var(--text-primary);">Toque para anexar ou arraste fotos</div>
+                  <div style="font-size: 0.72rem;">Compressão automática leve para celular e backup</div>
+                </div>
+              </div>
+              <span class="btn-ghost">Escolher</span>
+              <input type="file" id="inPiecePhotos" accept="image/*" multiple class="hidden" />
+            </div>
+
+            <div id="photoThumbsGrid" class="photo-thumbs hidden"></div>
+          </div>
+        </div>
+
+        <!-- Card 2: Tempo de Impressão, Mão de Obra, Extras e Quantidade -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title"><span class="step-badge">2</span> Tempo, Mão de Obra e Lote</h2>
+            <span id="outDecimalHoursHint" class="field-hint accent">6,00 h de máquina</span>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom: 14px;">
+            <div class="field-group">
+              <label class="field-label">Tempo de Impressão (Bambu Studio)</label>
+              <div class="time-pair">
+                <div class="input-wrap">
+                  <input type="number" id="inPrintH" class="has-suffix" min="0" step="1" value="6" aria-label="Horas de impressão" />
+                  <span class="input-suffix">h</span>
+                </div>
+                <div class="input-wrap">
+                  <input type="number" id="inPrintM" class="has-suffix" min="0" max="59" step="1" value="0" aria-label="Minutos de impressão" />
+                  <span class="input-suffix">min</span>
+                </div>
+              </div>
+              <span class="field-hint">Conversão automática para horas decimais.</span>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="inLaborMin">Mão de Obra Ativa (Minutos)</label>
+              <div class="input-wrap">
+                <input type="number" id="inLaborMin" class="has-suffix" min="0" step="1" value="20" />
+                <span class="input-suffix">min</span>
+              </div>
+              <span id="outLaborRateHint" class="field-hint">Preparo, limpeza de suportes e atendimento (R$ 25,00/h).</span>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="field-group">
+              <label class="field-label" for="inExtras">Acessórios / Ferragens Extras (R$)</label>
+              <div class="input-wrap">
+                <span class="input-prefix">R$</span>
+                <input type="number" id="inExtras" class="has-prefix" min="0" step="0.5" value="0" />
+              </div>
+              <span class="field-hint">Ímãs, bocal E27, parafusos, argola ou cola especial.</span>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">
+                <label for="inQty">Quantidade (Unidades)</label>
+                <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;font-weight:600;">
+                  <input type="checkbox" id="chkBatchDisc" checked />
+                  <span>Desc. <span id="lblBatchMin">5</span>+ un</span>
+                </label>
+              </div>
+              <div class="qty-stepper">
+                <button type="button" id="btnQtyMinus" class="qty-btn" aria-label="Diminuir quantidade">-</button>
+                <input type="number" id="inQty" class="qty-input" min="1" step="1" value="1" />
+                <button type="button" id="btnQtyPlus" class="qty-btn" aria-label="Aumentar quantidade">+</button>
+              </div>
+              <span id="outBatchHint" class="field-hint">Pedido unitário (sem desconto de lote).</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Multiplicador / Markup -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title"><span class="step-badge">3</span> Multiplicador de Lucro (Markup)</h2>
+            <div class="input-wrap" style="width: 100px;">
+              <input type="number" id="inMarkup" class="has-suffix" min="1.2" max="5.0" step="0.1" value="2.2" style="padding: 7px 28px 7px 10px; text-align: right; color: var(--accent);" />
+              <span class="input-suffix" style="right: 10px;">x</span>
+            </div>
+          </div>
+
+          <div class="preset-grid">
+            <button type="button" class="preset-btn active" data-markup="2.2">
+              <div class="preset-name">Utilitário / Padrão</div>
+              <div class="preset-val">2,2x <span>(54,5% margem)</span></div>
+            </button>
+            <button type="button" class="preset-btn" data-markup="2.8">
+              <div class="preset-name">Personalizado / Decor Grande</div>
+              <div class="preset-val">2,8x <span>(64,3% margem)</span></div>
+            </button>
+            <button type="button" class="preset-btn" data-markup="3.2">
+              <div class="preset-name">Premium / Exclusivo</div>
+              <div class="preset-val">3,2x <span>(68,8% margem)</span></div>
+            </button>
+          </div>
+
+          <input type="range" id="inMarkupSlider" min="1.5" max="4.0" step="0.1" value="2.2" aria-label="Ajuste fino de markup" />
+          <div class="slider-ticks">
+            <span>1,5x</span>
+            <span>2,2x (Utilitário)</span>
+            <span>2,8x (Decor)</span>
+            <span>3,2x (Premium)</span>
+            <span>4,0x</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Coluna Direita: Resultados Financeiros e Pagamento -->
+      <div class="sticky-col">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Resumo do Orçamento</h2>
+            <span id="outOrderBadge" class="badge-pro">1 unidade</span>
+          </div>
+
+          <!-- Cards Lado a Lado: PIX/Dinheiro vs Cartão -->
+          <div class="payment-grid">
+            <!-- Card 1: À Vista (PIX / Dinheiro) -->
+            <div class="pay-card pix">
+              <div>
+                <div class="pay-top">
+                  <span class="pay-tag">À Vista (PIX / Dinheiro)</span>
+                  <span class="pay-pill">Sem Taxa</span>
+                </div>
+                <div id="outPixUnit" class="pay-price">R$ 0,00</div>
+                <div id="outPixSub" class="pay-sub">Total do pedido: R$ 0,00</div>
+              </div>
+
+              <div class="pay-footer">
+                <label for="inPixDisc" style="font-weight:700;color:var(--text-secondary);">Desconto PIX (%):</label>
+                <div class="input-wrap" style="width: 74px;">
+                  <input type="number" id="inPixDisc" class="mini-input" min="0" max="30" step="1" value="0" />
+                  <span class="input-suffix" style="right: 8px; font-size: 0.72rem;">%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Cartão de Crédito / Débito -->
+            <div class="pay-card card-credit">
+              <div>
+                <div class="pay-top">
+                  <span class="pay-tag">Cartão</span>
+                  <span id="outCardFeePill" class="pay-pill">Taxa 7,90%</span>
+                </div>
+                <div id="outCardInstallment" class="pay-price" style="font-size: 1.35rem;">3x de R$ 0,00</div>
+                <div id="outCardTotalSub" class="pay-sub">Total no cartão: R$ 0,00</div>
+              </div>
+
+              <div class="pay-footer">
+                <select id="inCardPlan" class="mini-select" aria-label="Parcelamento no cartão">
+                  <option value="debit">Débito (1,99%)</option>
+                  <option value="1x">Crédito 1x (4,99%)</option>
+                  <option value="2x">2x no Crédito (6,50%)</option>
+                  <option value="3x" selected>3x no Crédito (7,90%)</option>
+                  <option value="4x">4x no Crédito (9,20%)</option>
+                  <option value="5x">5x no Crédito (10,50%)</option>
+                  <option value="6x">6x no Crédito (11,80%)</option>
+                  <option value="10x">10x no Crédito (16,50%)</option>
+                  <option value="12x">12x no Crédito (18,90%)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPIs de Custo e Lucro -->
+          <div class="kpi-grid">
+            <div class="kpi-box">
+              <div class="kpi-label">Custo Produção</div>
+              <div id="outUnitCost" class="kpi-val text-rose">R$ 0,00</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">Lucro Líquido</div>
+              <div id="outNetProfit" class="kpi-val text-emerald">R$ 0,00</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">Margem Líquida</div>
+              <div id="outNetMargin" class="kpi-val text-sky">0,0%</div>
+            </div>
+          </div>
+
+          <!-- Detalhamento de Custos e Composição Visual -->
+          <div class="breakdown-box">
+            <div class="breakdown-header">
+              <span>Composição Unitária (Cartão)</span>
+              <span id="outBarTotal" style="color: var(--text-secondary);">R$ 0,00</span>
+            </div>
+
+            <div id="stackedBar" class="stacked-bar" aria-hidden="true"></div>
+
+            <div class="legend-grid">
+              <div class="legend-item">
+                <span class="legend-left"><span class="dot" style="background:#38bdf8;"></span>Filamento</span>
+                <span id="legMat" class="legend-val">R$ 0,00</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-left"><span class="dot" style="background:#818cf8;"></span>Máquina (85W)</span>
+                <span id="legMach" class="legend-val">R$ 0,00</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-left"><span class="dot" style="background:#f59e0b;"></span>Falhas (10%)</span>
+                <span id="legFail" class="legend-val">R$ 0,00</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-left"><span class="dot" style="background:#c084fc;"></span>Mão de Obra</span>
+                <span id="legLabor" class="legend-val">R$ 0,00</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-left"><span class="dot" style="background:#94a3b8;"></span>Emb.+MEI+Extras</span>
+                <span id="legFixed" class="legend-val">R$ 0,00</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-left"><span class="dot" style="background:#fb7185;"></span>Taxa Maquininha</span>
+                <span id="legFee" class="legend-val text-rose">R$ 0,00</span>
+              </div>
+              <div class="legend-item legend-total">
+                <span class="legend-left"><span class="dot" style="background:#10b981;"></span>Lucro Líquido Protegido</span>
+                <span id="legProfit">R$ 0,00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botões de Ação -->
+          <div class="action-row">
+            <button type="button" id="btnCopyWpp" class="btn-primary">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"/></svg>
+              Copiar Orçamento para WhatsApp
+            </button>
+            <button type="button" id="btnSaveCat" class="btn-secondary">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+              <span id="lblSaveCatBtn">Salvar no Catálogo</span>
+            </button>
+          </div>
+          <div id="saveAsNewWrap" class="hidden" style="margin-top: 8px;">
+            <button type="button" id="btnSaveAsNew" class="btn-ghost" style="width:100%;padding:9px;">
+              + Salvar como Nova Cópia no Catálogo
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== ABA 2: CATÁLOGO SALVO & BACKUP ==================== -->
+    <section id="view-catalog" class="tab-view hidden">
+      <div class="card" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;">
+        <div>
+          <h2 class="card-title">Catálogo Salvo — 3D Solimões</h2>
+          <p class="field-hint" style="margin-top:4px;">Carregue qualquer peça na calculadora em 1 clique ou sincronize entre seu MacBook e Samsung S23 Ultra via backup JSON.</p>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <button type="button" id="btnExportJson" class="btn-secondary" style="padding:10px 14px;font-size:0.78rem;">
+            Exportar Backup (.json)
+          </button>
+          <label class="btn-primary" style="padding:10px 14px;font-size:0.78rem;cursor:pointer;">
+            Importar Backup (.json)
+            <input type="file" id="inImportJson" accept=".json" class="hidden" />
+          </label>
+        </div>
+      </div>
+
+      <div id="catalogGrid" class="catalog-grid"></div>
+    </section>
+
+    <!-- ==================== ABA 3: PARÂMETROS FIXOS ==================== -->
+    <section id="view-settings" class="tab-view hidden">
+      <div class="card" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;">
+        <div>
+          <h2 class="card-title">Parâmetros Fixos do Estúdio (Tabatinga, AM)</h2>
+          <p class="field-hint" style="margin-top:4px;">Calibração híbrida passiva (85W = média automática entre placa fria CryoGrip 55W e texturizada 115W). Tudo é salvo automaticamente.</p>
+        </div>
+        <button type="button" id="btnRestoreDefaults" class="btn-ghost" style="color:var(--rose);border-color:var(--rose);">
+          Restaurar Padrões 3D Solimões
+        </button>
+      </div>
+
+      <div class="settings-grid">
+        <!-- Coluna 1: Impressora e Operação -->
+        <div class="card stack-col" style="gap:12px;">
+          <div class="card-header" style="margin-bottom:4px;">
+            <h3 class="card-title">Máquina &amp; Operação</h3>
+            <span id="setMachSummary" class="badge-pro">R$ 1,58/h</span>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="setMachValue">Valor da Impressora (R$)</label>
+            <input type="number" id="setMachValue" class="set-input" step="50" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="setMachLife">Vida Útil Estimada (Horas)</label>
+            <input type="number" id="setMachLife" class="set-input" step="100" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="setMachMaint">Reserva Manutenção / Bicos / Placas (R$/h)</label>
+            <input type="number" id="setMachMaint" class="set-input" step="0.05" />
+          </div>
+          <div class="fee-grid">
+            <div class="field-group">
+              <label class="field-label" for="setMachWatts">Potência Média (W)</label>
+              <input type="number" id="setMachWatts" class="set-input" step="5" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="setMachKwh">Tarifa Energia (R$/kWh)</label>
+              <input type="number" id="setMachKwh" class="set-input" step="0.01" />
+            </div>
+          </div>
+          <div class="fee-grid">
+            <div class="field-group">
+              <label class="field-label" for="setFailPct">Reserva Falhas (%)</label>
+              <input type="number" id="setFailPct" class="set-input" step="1" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="setLaborRate">Hora Técnica (R$/h)</label>
+              <input type="number" id="setLaborRate" class="set-input" step="1" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="setPkgMei">Embalagem + Rateio MEI por Pedido (R$)</label>
+            <input type="number" id="setPkgMei" class="set-input" step="0.5" />
+          </div>
+          <div class="fee-grid">
+            <div class="field-group">
+              <label class="field-label" for="setBatchMin">Mínimo p/ Desc. Lote</label>
+              <input type="number" id="setBatchMin" class="set-input" min="2" step="1" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="setBatchDisc">Desconto Lote (%)</label>
+              <input type="number" id="setBatchDisc" class="set-input" min="0" max="40" step="1" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Coluna 2: Preços de Filamentos -->
+        <div class="card stack-col" style="gap:12px;">
+          <div class="card-header" style="margin-bottom:4px;">
+            <h3 class="card-title">Filamentos (R$/kg Aterrado)</h3>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="setFil_pla">PLA Comum (R$/kg)</label>
+            <input type="number" id="setFil_pla" class="set-input" step="1" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="setFil_pla_silk">PLA Silk / Especial / Fosco (R$/kg)</label>
+            <input type="number" id="setFil_pla_silk" class="set-input" step="1" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="setFil_petg">PETG (R$/kg)</label>
+            <input type="number" id="setFil_petg" class="set-input" step="1" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="setFil_abs">ABS / ASA (R$/kg)</label>
+            <input type="number" id="setFil_abs" class="set-input" step="1" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="setFil_tpu">TPU Flexível (R$/kg)</label>
+            <input type="number" id="setFil_tpu" class="set-input" step="1" />
+          </div>
+        </div>
+
+        <!-- Coluna 3: Taxas da Maquininha -->
+        <div class="card stack-col" style="gap:12px;">
+          <div class="card-header" style="margin-bottom:4px;">
+            <h3 class="card-title">Taxas Maquininha (%)</h3>
+          </div>
+          <p class="field-hint">Repassadas via divisor reverso: <strong>Preço PIX ÷ (1 - Taxa%)</strong>.</p>
+          <div class="fee-grid">
+            <div class="field-group">
+              <label class="field-label" for="setFee_debit">Débito (%)</label>
+              <input type="number" id="setFee_debit" class="set-input" step="0.01" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="setFee_1x">Crédito 1x (%)</label>
+              <input type="number" id="setFee_1x" class="set-input" step="0.01" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="setFee_2x">2x Crédito (%)</label>
+              <input type="number" id="setFee_2x" class="set-input" step="0.01" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="setFee_3x">3x Crédito (%)</label>
+              <input type="number" id="setFee_3x" class="set-input" step="0.01" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="setFee_4x">4x Crédito (%)</label>
+              <input type="number" id="setFee_4x" class="set-input" step="0.01" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="setFee_5x">5x Crédito (%)</label>
+              <input type="number" id="setFee_5x" class="set-input" step="0.01" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="setFee_6x">6x Crédito (%)</label>
+              <input type="number" id="setFee_6x" class="set-input" step="0.01" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="setFee_10x">10x Crédito (%)</label>
+              <input type="number" id="setFee_10x" class="set-input" step="0.01" />
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="setFee_12x">12x Crédito (%)</label>
+              <input type="number" id="setFee_12x" class="set-input" step="0.01" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <textarea id="clipHelper" class="sr-only" aria-hidden="true"></textarea>
+
+  <script>
+    /* ==========================================================================
+       LÓGICA DA CALCULADORA DE PRECIFICAÇÃO 3D — 3D SOLIMÕES
+       Modo Híbrido Passivo: 85W (CryoGrip 55W + Texturizada 115W) -> R$ 1,58/h
+       ========================================================================== */
+    const STORAGE_SETTINGS = '3dsolimoes_settings_v4';
+    const STORAGE_CATALOG = '3dsolimoes_catalog_v4';
+    const STORAGE_THEME = '3dsolimoes_theme_v4';
+
+    const DEFAULT_SETTINGS = {
+      machValue: 4200,
+      machLife: 4000,
+      machMaint: 0.45,
+      machWatts: 85,      // Meio-termo passivo entre placa fria CryoGrip (55W) e texturizada (115W)
+      machKwh: 0.95,      // Tarifa média Amazonas (R$ 0,08075/h -> total R$ 1,58/h)
+      failPct: 10,
+      laborRate: 25.00,
+      pkgMei: 6.00,
+      batchMinQty: 5,
+      batchDiscPct: 10,
+      filaments: {
+        pla: 135,
+        pla_silk: 165,
+        petg: 145,
+        abs: 150,
+        tpu: 180
+      },
+      fees: {
+        debit: 1.99,
+        '1x': 4.99,
+        '2x': 6.50,
+        '3x': 7.90,
+        '4x': 9.20,
+        '5x': 10.50,
+        '6x': 11.80,
+        '10x': 16.50,
+        '12x': 18.90
+      }
+    };
+
+    const DEFAULT_CATALOG = [
+      {
+        id: 'cat-org-mesa',
+        name: 'Organizador de Mesa Robusto',
+        filType: 'pla',
+        customFilKg: 135,
+        totalWeight: 245,
+        printH: 6,
+        printM: 0,
+        laborMin: 20,
+        extras: 0,
+        qty: 1,
+        markup: 2.2,
+        pixDisc: 0,
+        cardPlan: '3x',
+        images: []
+      },
+      {
+        id: 'cat-letreiro-20',
+        name: 'Letreiro Personalizado 20cm',
+        filType: 'pla',
+        customFilKg: 135,
+        totalWeight: 95,
+        printH: 2,
+        printM: 30,
+        laborMin: 20,
+        extras: 0,
+        qty: 1,
+        markup: 2.8,
+        pixDisc: 0,
+        cardPlan: '3x',
+        images: []
+      },
+      {
+        id: 'cat-luminaria',
+        name: 'Luminária Escultural',
+        filType: 'pla_silk',
+        customFilKg: 165,
+        totalWeight: 320,
+        printH: 8,
+        printM: 0,
+        laborMin: 25,
+        extras: 12,
+        qty: 1,
+        markup: 2.8,
+        pixDisc: 0,
+        cardPlan: '3x',
+        images: []
+      }
+    ];
+
+    const FILAMENT_NAMES = {
+      pla: 'PLA Comum',
+      pla_silk: 'PLA Silk / Especial / Fosco',
+      petg: 'PETG Alta Resistência',
+      abs: 'ABS / ASA',
+      tpu: 'TPU Flexível',
+      custom: 'Filamento Personalizado'
+    };
+
+    const INSTALLMENT_META = {
+      debit: { count: 1, label: 'Débito' },
+      '1x': { count: 1, label: 'Crédito 1x' },
+      '2x': { count: 2, label: '2x' },
+      '3x': { count: 3, label: '3x' },
+      '4x': { count: 4, label: '4x' },
+      '5x': { count: 5, label: '5x' },
+      '6x': { count: 6, label: '6x' },
+      '10x': { count: 10, label: '10x' },
+      '12x': { count: 12, label: '12x' }
+    };
+
+    let settings = loadSettings();
+    let catalog = loadCatalog();
+    let snapshot = {};
+    let currentImages = [];
+    let editingCatalogId = null;
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(STORAGE_SETTINGS);
+        if (!raw) return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+        const parsed = JSON.parse(raw);
+        return {
+          ...DEFAULT_SETTINGS,
+          ...parsed,
+          filaments: { ...DEFAULT_SETTINGS.filaments, ...(parsed.filaments || {}) },
+          fees: { ...DEFAULT_SETTINGS.fees, ...(parsed.fees || {}) }
+        };
+      } catch (err) {
+        return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+      }
+    }
+
+    function saveSettings() {
+      try { localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(settings)); } catch (err) {}
+    }
+
+    function loadCatalog() {
+      try {
+        const raw = localStorage.getItem(STORAGE_CATALOG);
+        if (!raw) return JSON.parse(JSON.stringify(DEFAULT_CATALOG));
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : JSON.parse(JSON.stringify(DEFAULT_CATALOG));
+      } catch (err) {
+        return JSON.parse(JSON.stringify(DEFAULT_CATALOG));
+      }
+    }
+
+    function saveCatalog() {
+      try {
+        localStorage.setItem(STORAGE_CATALOG, JSON.stringify(catalog));
+      } catch (err) {
+        showToast('Armazenamento cheio! Exporte um backup .json e remova itens antigos.', true);
+      }
+      document.getElementById('navCatCount').textContent = catalog.length;
+    }
+
+    /* ==========================================================================
+       COMPRESSÃO AUTOMÁTICA DE IMAGENS (MAX 420PX, JPEG 0.72) & GALERIA
+       ========================================================================== */
+    function compressImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Falha ao ler arquivo'));
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onerror = () => reject(new Error('Imagem inválida'));
+          img.onload = () => {
+            const maxDim = 420;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w >= h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.72));
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleImageFiles(fileList) {
+      const files = Array.from(fileList || []).filter(f => f.type.startsWith('image/'));
+      if (files.length === 0) return;
+
+      const slotsLeft = 2 - currentImages.length;
+      if (slotsLeft <= 0) {
+        showToast('Limite máximo de 2 fotos por peça atingido.', true);
+        return;
+      }
+
+      const selected = files.slice(0, slotsLeft);
+      if (files.length > slotsLeft) {
+        showToast(`Apenas ${slotsLeft} foto(s) adicionada(s) — máximo de 2 por peça.`);
+      }
+
+      for (const file of selected) {
+        try {
+          const compressed = await compressImageFile(file);
+          currentImages.push(compressed);
+        } catch (err) {
+          showToast('Não foi possível processar uma das imagens.', true);
+        }
+      }
+      renderEditorPhotos();
+    }
+
+    function renderEditorPhotos() {
+      const countEl = document.getElementById('outPhotoCount');
+      const gridEl = document.getElementById('photoThumbsGrid');
+      countEl.textContent = `${currentImages.length}/2 fotos`;
+
+      if (currentImages.length === 0) {
+        gridEl.classList.add('hidden');
+        gridEl.innerHTML = '';
+        return;
+      }
+
+      gridEl.classList.remove('hidden');
+      gridEl.innerHTML = currentImages.map((src, idx) => `
+        <div class="photo-thumb-card">
+          <img src="${src}" alt="Foto ${idx + 1} da peça" onclick="openImageModal('${src}', 'Pré-visualização — Foto ${idx + 1}')" />
+          <button type="button" class="photo-remove-btn" onclick="removeEditorPhoto(${idx})" title="Remover foto" aria-label="Remover foto ${idx + 1}">&times;</button>
+        </div>
+      `).join('');
+    }
+
+    window.removeEditorPhoto = (idx) => {
+      currentImages.splice(idx, 1);
+      renderEditorPhotos();
+    };
+
+    window.openImageModal = (src, caption) => {
+      if (!src) return;
+      document.getElementById('imgModalTarget').src = src;
+      document.getElementById('imgModalCaption').textContent = caption || 'Peça 3D Solimões';
+      document.getElementById('imgModal').classList.remove('hidden');
+    };
+
+    function closeImageModal() {
+      document.getElementById('imgModal').classList.add('hidden');
+      document.getElementById('imgModalTarget').src = '';
+    }
+
+    function setEditingState(item) {
+      const banner = document.getElementById('editingBanner');
+      const bannerText = document.getElementById('editingBannerText');
+      const saveLbl = document.getElementById('lblSaveCatBtn');
+      const saveNewWrap = document.getElementById('saveAsNewWrap');
+
+      if (item) {
+        editingCatalogId = item.id;
+        bannerText.textContent = `Editando: ${item.name}`;
+        banner.classList.remove('hidden');
+        saveLbl.textContent = 'Atualizar no Catálogo';
+        saveNewWrap.classList.remove('hidden');
+      } else {
+        editingCatalogId = null;
+        banner.classList.add('hidden');
+        saveLbl.textContent = 'Salvar no Catálogo';
+        saveNewWrap.classList.add('hidden');
+      }
+    }
+
+    const fmtBRL = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
+    const fmtPct = (val) => val.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+    const numVal = (id) => Math.max(0, parseFloat(document.getElementById(id).value) || 0);
+
+    let toastTimeout;
+    function showToast(text, isError = false) {
+      const el = document.getElementById('toast');
+      const dot = document.getElementById('toastDot');
+      document.getElementById('toastMsg').textContent = text;
+      dot.style.background = isError ? 'var(--rose)' : 'var(--accent)';
+      el.style.borderColor = isError ? 'var(--rose)' : 'var(--accent)';
+      el.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => el.classList.remove('show'), 3200);
+    }
+
+    /* Taxa hora-máquina passiva (Depreciação + Manutenção + Energia 85W) */
+    function getPassiveMachineRate() {
+      const depr = settings.machValue / Math.max(1, settings.machLife);
+      const energy = (settings.machWatts / 1000) * settings.machKwh;
+      return depr + settings.machMaint + energy;
+    }
+
+    function syncSettingsInputs() {
+      document.getElementById('setMachValue').value = settings.machValue;
+      document.getElementById('setMachLife').value = settings.machLife;
+      document.getElementById('setMachMaint').value = settings.machMaint;
+      document.getElementById('setMachWatts').value = settings.machWatts;
+      document.getElementById('setMachKwh').value = settings.machKwh;
+      document.getElementById('setFailPct').value = settings.failPct;
+      document.getElementById('setLaborRate').value = settings.laborRate;
+      document.getElementById('setPkgMei').value = settings.pkgMei;
+      document.getElementById('setBatchMin').value = settings.batchMinQty;
+      document.getElementById('setBatchDisc').value = settings.batchDiscPct;
+
+      Object.keys(settings.filaments).forEach(k => {
+        const inp = document.getElementById(`setFil_${k}`);
+        if (inp) inp.value = settings.filaments[k];
+      });
+
+      Object.keys(settings.fees).forEach(k => {
+        const inp = document.getElementById(`setFee_${k}`);
+        if (inp) inp.value = settings.fees[k];
+      });
+
+      document.getElementById('lblBatchMin').textContent = settings.batchMinQty;
+      refreshDropdownTexts();
+    }
+
+    function refreshDropdownTexts() {
+      const selFil = document.getElementById('inFilType');
+      const curFil = selFil.value;
+      selFil.options[0].text = `PLA Comum (${fmtBRL(settings.filaments.pla)}/kg)`;
+      selFil.options[1].text = `PLA Silk / Especial / Fosco (${fmtBRL(settings.filaments.pla_silk)}/kg)`;
+      selFil.options[2].text = `PETG Alta Resistência (${fmtBRL(settings.filaments.petg)}/kg)`;
+      selFil.options[3].text = `ABS / ASA (${fmtBRL(settings.filaments.abs)}/kg)`;
+      selFil.options[4].text = `TPU Flexível (${fmtBRL(settings.filaments.tpu)}/kg)`;
+      selFil.value = curFil;
+
+      const selCard = document.getElementById('inCardPlan');
+      const curCard = selCard.value;
+      Array.from(selCard.options).forEach(opt => {
+        const k = opt.value;
+        const fee = settings.fees[k] ?? 0;
+        const prefix = k === 'debit' ? 'Débito' : (k === '1x' ? 'Crédito 1x' : `${k} no Crédito`);
+        opt.text = `${prefix} (${fee.toFixed(2).replace('.', ',')}%)`;
+      });
+      selCard.value = curCard;
+    }
+
+    function readSettingsFromInputs() {
+      settings.machValue = numVal('setMachValue');
+      settings.machLife = Math.max(1, numVal('setMachLife'));
+      settings.machMaint = numVal('setMachMaint');
+      settings.machWatts = numVal('setMachWatts');
+      settings.machKwh = numVal('setMachKwh');
+      settings.failPct = numVal('setFailPct');
+      settings.laborRate = numVal('setLaborRate');
+      settings.pkgMei = numVal('setPkgMei');
+      settings.batchMinQty = Math.max(2, parseInt(document.getElementById('setBatchMin').value) || 5);
+      settings.batchDiscPct = numVal('setBatchDisc');
+
+      Object.keys(settings.filaments).forEach(k => {
+        settings.filaments[k] = numVal(`setFil_${k}`);
+      });
+
+      Object.keys(settings.fees).forEach(k => {
+        settings.fees[k] = numVal(`setFee_${k}`);
+      });
+
+      document.getElementById('lblBatchMin').textContent = settings.batchMinQty;
+      saveSettings();
+      refreshDropdownTexts();
+      recalculate();
+    }
+
+    function highlightMarkupPresets(val) {
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        const pVal = parseFloat(btn.dataset.markup);
+        btn.classList.toggle('active', Math.abs(pVal - val) < 0.01);
+      });
+    }
+
+    /* Motor Principal de Cálculo */
+    function recalculate() {
+      const name = document.getElementById('inName').value.trim() || 'Peça Personalizada 3D';
+      const filType = document.getElementById('inFilType').value;
+      const customWrap = document.getElementById('customFilWrap');
+
+      let filKgPrice = 135;
+      if (filType === 'custom') {
+        customWrap.classList.remove('hidden');
+        filKgPrice = numVal('inCustomFilKg');
+      } else {
+        customWrap.classList.add('hidden');
+        filKgPrice = settings.filaments[filType] ?? 135;
+      }
+
+      const filGramPrice = filKgPrice / 1000;
+      document.getElementById('outFilUnitHint').textContent = `${fmtBRL(filKgPrice)}/kg • R$ ${filGramPrice.toFixed(3).replace('.', ',')}/g (aterrado Tabatinga)`;
+
+      const totalWeight = numVal('inTotalWeight');
+      const printH = Math.floor(numVal('inPrintH'));
+      const printM = Math.floor(numVal('inPrintM'));
+      const decimalHours = printH + (printM / 60);
+      document.getElementById('outDecimalHoursHint').textContent = `${decimalHours.toFixed(2).replace('.', ',')} h de máquina`;
+
+      const laborMin = numVal('inLaborMin');
+      document.getElementById('outLaborRateHint').textContent = `Preparo, limpeza e atendimento (${fmtBRL(settings.laborRate)}/h).`;
+
+      const extras = numVal('inExtras');
+      const qty = Math.max(1, parseInt(document.getElementById('inQty').value) || 1);
+      const batchEnabled = document.getElementById('chkBatchDisc').checked;
+      const markup = Math.max(1.0, numVal('inMarkup'));
+      const pixDiscPct = Math.min(40, numVal('inPixDisc'));
+      const cardPlan = document.getElementById('inCardPlan').value;
+
+      const machRate = getPassiveMachineRate();
+      document.getElementById('bannerMachRate').textContent = `Hora-Máquina Fixa: ${fmtBRL(machRate)}/h`;
+      document.getElementById('setMachSummary').textContent = `${fmtBRL(machRate)}/h`;
+
+      // 1. Composição do Custo Unitário
+      const costMat = totalWeight * filGramPrice;
+      const costMach = decimalHours * machRate;
+      const costFail = (costMat + costMach) * (settings.failPct / 100);
+      const costLabor = (laborMin / 60) * settings.laborRate;
+      const costFixed = settings.pkgMei + extras;
+      const unitCost = costMat + costMach + costFail + costLabor + costFixed;
+
+      // 2. Preço Base Alvo + Desconto Automático de Lote
+      let targetBasePrice = unitCost * markup;
+      let batchApplied = false;
+      if (batchEnabled && qty >= settings.batchMinQty && settings.batchDiscPct > 0) {
+        targetBasePrice = targetBasePrice * (1 - (settings.batchDiscPct / 100));
+        batchApplied = true;
+      }
+
+      const batchHint = document.getElementById('outBatchHint');
+      if (batchApplied) {
+        batchHint.textContent = `Desconto de lote (${settings.batchDiscPct}%) aplicado!`;
+        batchHint.className = 'field-hint accent';
+      } else {
+        batchHint.textContent = qty === 1 ? 'Pedido unitário (sem desconto de lote).' : `Pedido de ${qty} unidades.`;
+        batchHint.className = 'field-hint';
+      }
+
+      // 3. Pagamento À Vista (PIX / Dinheiro)
+      const pixUnitPrice = targetBasePrice * (1 - (pixDiscPct / 100));
+      const pixOrderTotal = pixUnitPrice * qty;
+
+      // 4. Pagamento Cartão via Divisor Reverso: Preço Base / (1 - Taxa%)
+      const feePct = settings.fees[cardPlan] ?? 0;
+      const reverseDivisor = Math.max(0.1, 1 - (feePct / 100));
+      const cardUnitTotal = targetBasePrice / reverseDivisor;
+      const cardOrderTotal = cardUnitTotal * qty;
+      const instCount = INSTALLMENT_META[cardPlan]?.count || 1;
+      const instValue = cardOrderTotal / instCount;
+      const cardFeeUnit = cardUnitTotal - targetBasePrice;
+
+      // 5. Lucro Líquido e Margem Real (sobre o valor líquido recebido à vista)
+      const netProfitUnit = pixUnitPrice - unitCost;
+      const netMarginPct = pixUnitPrice > 0 ? (netProfitUnit / pixUnitPrice) * 100 : 0;
+
+      // Atualiza Interface
+      document.getElementById('outOrderBadge').textContent = qty === 1 ? '1 unidade' : `${qty} unidades`;
+      document.getElementById('outPixUnit').textContent = fmtBRL(pixUnitPrice);
+      document.getElementById('outPixSub').textContent = qty > 1
+        ? `Total pedido (${qty} un): ${fmtBRL(pixOrderTotal)}`
+        : (pixDiscPct > 0 ? `Já com ${pixDiscPct}% de desconto à vista` : 'Recebimento líquido sem taxas');
+
+      document.getElementById('outCardFeePill').textContent = `Taxa ${feePct.toFixed(2).replace('.', ',')}%`;
+      document.getElementById('outCardInstallment').textContent = instCount === 1
+        ? `${fmtBRL(cardOrderTotal)} à vista`
+        : `${instCount}x de ${fmtBRL(instValue)}`;
+      document.getElementById('outCardTotalSub').textContent = qty > 1
+        ? `Total pedido (${qty} un): ${fmtBRL(cardOrderTotal)}`
+        : `Total no cartão: ${fmtBRL(cardUnitTotal)}`;
+
+      document.getElementById('outUnitCost').textContent = fmtBRL(unitCost);
+      document.getElementById('outNetProfit').textContent = fmtBRL(netProfitUnit);
+      document.getElementById('outNetMargin').textContent = fmtPct(netMarginPct);
+
+      // Barra e Legenda
+      document.getElementById('outBarTotal').textContent = fmtBRL(cardUnitTotal);
+      document.getElementById('legMat').textContent = fmtBRL(costMat);
+      document.getElementById('legMach').textContent = fmtBRL(costMach);
+      document.getElementById('legFail').textContent = fmtBRL(costFail);
+      document.getElementById('legLabor').textContent = fmtBRL(costLabor);
+      document.getElementById('legFixed').textContent = fmtBRL(costFixed);
+      document.getElementById('legFee').textContent = fmtBRL(cardFeeUnit);
+
+      const protectedProfit = Math.max(0, targetBasePrice - unitCost);
+      const protectedMargin = targetBasePrice > 0 ? (protectedProfit / targetBasePrice) * 100 : 0;
+      document.getElementById('legProfit').textContent = `${fmtBRL(protectedProfit)} (${fmtPct(protectedMargin)})`;
+
+      const barData = [
+        { val: costMat, bg: '#38bdf8' },
+        { val: costMach, bg: '#818cf8' },
+        { val: costFail, bg: '#f59e0b' },
+        { val: costLabor, bg: '#c084fc' },
+        { val: costFixed, bg: '#94a3b8' },
+        { val: cardFeeUnit, bg: '#fb7185' },
+        { val: protectedProfit, bg: '#10b981' }
+      ];
+      const denom = cardUnitTotal > 0 ? cardUnitTotal : 1;
+      document.getElementById('stackedBar').innerHTML = barData
+        .map(seg => seg.val > 0 ? `<div class="bar-seg" style="width:${(seg.val / denom) * 100}%;background:${seg.bg};"></div>` : '')
+        .join('');
+
+      snapshot = {
+        name,
+        filType,
+        filLabel: FILAMENT_NAMES[filType] || 'PLA',
+        customFilKg: numVal('inCustomFilKg'),
+        totalWeight,
+        printH,
+        printM,
+        laborMin,
+        extras,
+        qty,
+        markup,
+        pixDisc: pixDiscPct,
+        cardPlan,
+        pixOrderTotal,
+        cardOrderTotal,
+        instCount,
+        instValue
+      };
+    }
+
+    function renderCatalog() {
+      const grid = document.getElementById('catalogGrid');
+      document.getElementById('navCatCount').textContent = catalog.length;
+
+      if (catalog.length === 0) {
+        grid.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center;color:var(--text-secondary);">Nenhuma peça salva no catálogo. Use o botão <strong>Salvar no Catálogo</strong> na calculadora.</div>`;
+        return;
+      }
+
+      grid.innerHTML = catalog.map(item => {
+        const kgPrice = item.filType === 'custom' ? (item.customFilKg || 165) : (settings.filaments[item.filType] ?? 135);
+        const cMat = (item.totalWeight || 0) * (kgPrice / 1000);
+        const hrs = (item.printH || 0) + ((item.printM || 0) / 60);
+        const cMach = hrs * getPassiveMachineRate();
+        const cFail = (cMat + cMach) * (settings.failPct / 100);
+        const cLabor = ((item.laborMin || 0) / 60) * settings.laborRate;
+        const uCost = cMat + cMach + cFail + cLabor + settings.pkgMei + (item.extras || 0);
+        const pixPrice = uCost * (item.markup || 2.2) * (1 - ((item.pixDisc || 0) / 100));
+        const imgs = Array.isArray(item.images) ? item.images.slice(0, 2) : [];
+        const safeName = (item.name || 'Peça 3D').replace(/'/g, "\\'");
+
+        let mediaHtml = '';
+        if (imgs.length === 1) {
+          mediaHtml = `
+            <div class="cat-media-strip cols-1">
+              <img src="${imgs[0]}" alt="${item.name}" onclick="openImageModal('${imgs[0]}', '${safeName}')" />
+            </div>`;
+        } else if (imgs.length >= 2) {
+          mediaHtml = `
+            <div class="cat-media-strip cols-2">
+              <img src="${imgs[0]}" alt="${item.name} - Foto 1" onclick="openImageModal('${imgs[0]}', '${safeName} (1/2)')" />
+              <img src="${imgs[1]}" alt="${item.name} - Foto 2" onclick="openImageModal('${imgs[1]}', '${safeName} (2/2)')" />
+            </div>`;
+        } else {
+          mediaHtml = `
+            <div class="cat-media-strip cols-1">
+              <div class="cat-media-empty">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                <span>Sem foto anexada</span>
+              </div>
+            </div>`;
+        }
+
+        return `
+          <article class="cat-card">
+            <div>
+              ${mediaHtml}
+              <div class="cat-top">
+                <span class="cat-mat-badge">${FILAMENT_NAMES[item.filType] || 'PLA'}</span>
+                <button type="button" class="btn-del" onclick="removeCatalogItem('${item.id}')" title="Remover peça" aria-label="Remover peça">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+              <h3 class="cat-name">${item.name}</h3>
+              <p class="cat-meta">${item.totalWeight}g • ${item.printH}h${item.printM > 0 ? item.printM + 'm' : ''} • Markup ${item.markup}x</p>
+            </div>
+            <div class="cat-bottom">
+              <div>
+                <div class="kpi-label">À Vista (PIX)</div>
+                <div class="kpi-val text-emerald" style="font-size:1.15rem;">${fmtBRL(pixPrice)}</div>
+              </div>
+              <button type="button" class="btn-primary" style="padding:9px 14px;font-size:0.78rem;" onclick="loadCatalogItem('${item.id}')">
+                Carregar / Editar
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    window.loadCatalogItem = (id) => {
+      const item = catalog.find(x => x.id === id);
+      if (!item) return;
+      document.getElementById('inName').value = item.name;
+      document.getElementById('inFilType').value = item.filType || 'pla';
+      document.getElementById('inCustomFilKg').value = item.customFilKg || 165;
+      document.getElementById('inTotalWeight').value = item.totalWeight || 100;
+      document.getElementById('inPrintH').value = item.printH || 0;
+      document.getElementById('inPrintM').value = item.printM || 0;
+      document.getElementById('inLaborMin').value = item.laborMin || 20;
+      document.getElementById('inExtras').value = item.extras || 0;
+      document.getElementById('inQty').value = item.qty || 1;
+      document.getElementById('inMarkup').value = item.markup || 2.2;
+      document.getElementById('inMarkupSlider').value = Math.min(4, Math.max(1.5, item.markup || 2.2));
+      document.getElementById('inPixDisc').value = item.pixDisc || 0;
+      document.getElementById('inCardPlan').value = item.cardPlan || '3x';
+
+      currentImages = Array.isArray(item.images) ? [...item.images] : [];
+      renderEditorPhotos();
+      setEditingState(item);
+
+      highlightMarkupPresets(item.markup || 2.2);
+      recalculate();
+      activateTab('calc');
+      showToast(`"${item.name}" carregada para edição!`);
+    };
+
+    window.removeCatalogItem = (id) => {
+      catalog = catalog.filter(x => x.id !== id);
+      if (editingCatalogId === id) {
+        setEditingState(null);
+      }
+      saveCatalog();
+      renderCatalog();
+      showToast('Peça removida do catálogo.');
+    };
+
+    function activateTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tabId);
+      });
+    }
+
+    /* Eventos de Navegação */
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+    });
+
+    /* Alternância de Tema Claro/Escuro */
+    if (localStorage.getItem(STORAGE_THEME) === 'light') {
+      document.body.classList.add('light-mode');
+    }
+    document.getElementById('btnToggleTheme').addEventListener('click', () => {
+      document.body.classList.toggle('light-mode');
+      const isLight = document.body.classList.contains('light-mode');
+      try { localStorage.setItem(STORAGE_THEME, isLight ? 'light' : 'dark'); } catch (err) {}
+    });
+
+    /* Eventos dos Inputs da Calculadora */
+    ['inName', 'inFilType', 'inCustomFilKg', 'inTotalWeight', 'inPrintH', 'inPrintM', 'inLaborMin', 'inExtras', 'inQty', 'inPixDisc', 'inCardPlan'].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', recalculate);
+      el.addEventListener('change', recalculate);
+    });
+    document.getElementById('chkBatchDisc').addEventListener('change', recalculate);
+
+    document.getElementById('btnQtyMinus').addEventListener('click', () => {
+      const el = document.getElementById('inQty');
+      el.value = Math.max(1, (parseInt(el.value) || 1) - 1);
+      recalculate();
+    });
+
+    document.getElementById('btnQtyPlus').addEventListener('click', () => {
+      const el = document.getElementById('inQty');
+      el.value = (parseInt(el.value) || 1) + 1;
+      recalculate();
+    });
+
+    document.getElementById('inMarkup').addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value) || 2.2;
+      document.getElementById('inMarkupSlider').value = Math.min(4, Math.max(1.5, v));
+      highlightMarkupPresets(v);
+      recalculate();
+    });
+
+    document.getElementById('inMarkupSlider').addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      document.getElementById('inMarkup').value = v.toFixed(1);
+      highlightMarkupPresets(v);
+      recalculate();
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = parseFloat(btn.dataset.markup);
+        document.getElementById('inMarkup').value = v.toFixed(1);
+        document.getElementById('inMarkupSlider').value = v;
+        highlightMarkupPresets(v);
+        recalculate();
+      });
+    });
+
+    document.getElementById('btnNewPiece').addEventListener('click', () => {
+      document.getElementById('inName').value = '';
+      document.getElementById('inFilType').value = 'pla';
+      document.getElementById('inTotalWeight').value = 100;
+      document.getElementById('inPrintH').value = 2;
+      document.getElementById('inPrintM').value = 30;
+      document.getElementById('inLaborMin').value = 20;
+      document.getElementById('inExtras').value = 0;
+      document.getElementById('inQty').value = 1;
+      document.getElementById('inPixDisc').value = 0;
+      currentImages = [];
+      renderEditorPhotos();
+      setEditingState(null);
+      recalculate();
+      showToast('Campos prontos para um novo orçamento.');
+    });
+
+    document.getElementById('btnCancelEdit').addEventListener('click', () => {
+      setEditingState(null);
+      showToast('Desvinculado. O próximo salvamento criará um novo item.');
+    });
+
+    /* Eventos de Upload / Drag-and-Drop de Fotos e Modal */
+    const photoDropzone = document.getElementById('photoDropzone');
+    const inPiecePhotos = document.getElementById('inPiecePhotos');
+
+    photoDropzone.addEventListener('click', () => inPiecePhotos.click());
+    photoDropzone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        inPiecePhotos.click();
+      }
+    });
+    photoDropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      photoDropzone.classList.add('dragover');
+    });
+    photoDropzone.addEventListener('dragleave', () => {
+      photoDropzone.classList.remove('dragover');
+    });
+    photoDropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      photoDropzone.classList.remove('dragover');
+      handleImageFiles(e.dataTransfer.files);
+    });
+    inPiecePhotos.addEventListener('change', (e) => {
+      handleImageFiles(e.target.files);
+      e.target.value = '';
+    });
+
+    document.getElementById('btnCloseImgModal').addEventListener('click', closeImageModal);
+    document.getElementById('imgModal').addEventListener('click', (e) => {
+      if (e.target.id === 'imgModal') closeImageModal();
+    });
+
+    function buildCatalogPayload(id) {
+      return {
+        id,
+        name: snapshot.name,
+        filType: snapshot.filType,
+        customFilKg: snapshot.customFilKg,
+        totalWeight: snapshot.totalWeight,
+        printH: snapshot.printH,
+        printM: snapshot.printM,
+        laborMin: snapshot.laborMin,
+        extras: snapshot.extras,
+        qty: snapshot.qty,
+        markup: snapshot.markup,
+        pixDisc: snapshot.pixDisc,
+        cardPlan: snapshot.cardPlan,
+        images: [...currentImages]
+      };
+    }
+
+    /* Salvar ou Atualizar no Catálogo */
+    document.getElementById('btnSaveCat').addEventListener('click', () => {
+      if (editingCatalogId) {
+        const idx = catalog.findIndex(x => x.id === editingCatalogId);
+        if (idx !== -1) {
+          const updated = buildCatalogPayload(editingCatalogId);
+          catalog[idx] = updated;
+          saveCatalog();
+          renderCatalog();
+          setEditingState(updated);
+          showToast(`"${updated.name}" atualizada no catálogo!`);
+          return;
+        }
+      }
+
+      const newEntry = buildCatalogPayload('cat-' + Date.now());
+      catalog.unshift(newEntry);
+      saveCatalog();
+      renderCatalog();
+      setEditingState(newEntry);
+      showToast(`"${newEntry.name}" salva no catálogo!`);
+    });
+
+    document.getElementById('btnSaveAsNew').addEventListener('click', () => {
+      const newEntry = buildCatalogPayload('cat-' + Date.now());
+      catalog.unshift(newEntry);
+      saveCatalog();
+      renderCatalog();
+      setEditingState(newEntry);
+      showToast(`Nova cópia "${newEntry.name}" salva no catálogo!`);
+    });
+
+    /* Copiar Orçamento para WhatsApp */
+    document.getElementById('btnCopyWpp').addEventListener('click', () => {
+      const s = snapshot;
+      const qtyText = s.qty > 1 ? `• *Quantidade:* ${s.qty} unidades\n` : '';
+      const cardText = s.instCount === 1
+        ? `💳 *Cartão (${INSTALLMENT_META[s.cardPlan].label}):* ${fmtBRL(s.cardOrderTotal)}`
+        : `💳 *Cartão de Crédito:* ${s.instCount}x de ${fmtBRL(s.instValue)} (Total: ${fmtBRL(s.cardOrderTotal)})`;
+
+      const message =
+        `*Orçamento — 3D Solimões* 📦✨\n` +
+        `────────────────────\n` +
+        `• *Projeto:* ${s.name}\n` +
+        qtyText +
+        `• *Material:* ${s.filLabel}\n` +
+        `────────────────────\n` +
+        `💰 *À Vista (PIX ou Dinheiro):* ${fmtBRL(s.pixOrderTotal)}\n` +
+        `${cardText}\n\n` +
+        `_Produção local sob encomenda em Tabatinga/AM (sem frete)._`;
+
+      const helper = document.getElementById('clipHelper');
+      helper.value = message;
+      helper.classList.remove('sr-only');
+      helper.select();
+      document.execCommand('copy');
+      helper.classList.add('sr-only');
+      showToast('Orçamento copiado! Cole no WhatsApp.');
+    });
+
+    /* Eventos dos Parâmetros Fixos */
+    document.querySelectorAll('.set-input').forEach(inp => {
+      inp.addEventListener('input', readSettingsFromInputs);
+    });
+
+    document.getElementById('btnRestoreDefaults').addEventListener('click', () => {
+      settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+      saveSettings();
+      syncSettingsInputs();
+      recalculate();
+      renderCatalog();
+      showToast('Padrões híbridos (85W / R$ 1,58/h) restaurados!');
+    });
+
+    /* Exportar e Importar Backup JSON */
+    document.getElementById('btnExportJson').addEventListener('click', () => {
+      const exportData = {
+        studio: '3D Solimões',
+        exportedAt: new Date().toISOString(),
+        settings,
+        catalog
+      };
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup_3d_solimoes_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Backup .json exportado com sucesso!');
+    });
+
+    document.getElementById('inImportJson').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (data.settings) {
+            settings = {
+              ...DEFAULT_SETTINGS,
+              ...data.settings,
+              filaments: { ...DEFAULT_SETTINGS.filaments, ...(data.settings.filaments || {}) },
+              fees: { ...DEFAULT_SETTINGS.fees, ...(data.settings.fees || {}) }
+            };
+            saveSettings();
+            syncSettingsInputs();
+          }
+          if (Array.isArray(data.catalog)) {
+            catalog = data.catalog;
+            saveCatalog();
+            renderCatalog();
+          }
+          recalculate();
+          showToast('Backup importado com sucesso!');
+        } catch (err) {
+          showToast('Erro ao ler o arquivo .json.', true);
+        }
+        e.target.value = '';
+      };
+      reader.readAsText(file);
+    });
+
+    /* Inicialização */
+    syncSettingsInputs();
+    recalculate();
+    renderCatalog();
+  </script>
+</body>
+</html>
